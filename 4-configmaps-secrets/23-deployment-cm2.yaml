@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configmap-deployment
+  labels:
+    app: configmap-deploy
+    environment: testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: configmap-pod
+  template:
+    metadata:
+      labels:
+        app: configmap-pod
+    spec:
+      volumes:
+      - name: html-volume
+        configMap:
+          name: configmap-volume
+          items:
+          - key: index.html # The key in the ConfigMap to be used as a file
+            path: index.html # The filename that will be created inside the mount path
+      containers:
+      - name: nginx-container
+        image: nginx:latest
+        imagePullPolicy: Always
+        env:
+        - name: APP
+          valueFrom:
+            configMapKeyRef:
+              name: configmap-volume
+              key: APP
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: configmap-volume
+              key: ENVIRONMENT
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+          readOnly: true
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: configmap-service
+  labels:
+    environment: testing
+spec:
+  selector:
+    app: configmap-pod
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30081

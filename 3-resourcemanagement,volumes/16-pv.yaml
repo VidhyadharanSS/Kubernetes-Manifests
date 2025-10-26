@@ -1,0 +1,17 @@
+#Persistent volume 
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-pod
+  labels:
+    app: pv-testing
+    environment: testing
+spec:
+  capacity:
+    storage: 5Gi #5 Gibibytes storage is ensured for the Persistent volume
+  accessModes:
+  - ReadWriteOnce #If the access mode is ReadWriteOnce or ReadWriteOncePod, it is for block storage  
+  persistentVolumeReclaimPolicy: Retain #Retain policy means even if the PVC is deleted, the PV's data will stay the same, used in on-premises setup 
+  hostPath:
+    path: /mnt/data

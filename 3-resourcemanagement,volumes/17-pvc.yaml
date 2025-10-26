@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-pod
+  labels:
+    app: pvc-testing
+    environment: testing
+spec:
+  accessModes:
+  - ReadWriteOnce #Same goes for here, if ReadWriteOnce means volume will be mounted by a single node at a time with ReadWrite 
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: standard

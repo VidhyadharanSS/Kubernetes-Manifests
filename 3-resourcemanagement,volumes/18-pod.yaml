@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod-pv
+  labels:
+    app: pv-test-pod
+    environment: testing
+spec:
+  volumes:
+  - name: persistent-storage
+    persistentVolumeClaim:
+      claimName: pvc-pod
+  containers:
+  - name: pv-container
+    image: nginx
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort: 80
+    volumeMounts:
+    - name: persistent-storage
+      mountPath: /usr/share/nginx/html
+    resources:
+      requests:
+        cpu: "0.1"
+        memory: "10Mi"
+      limits:
+        cpu: "0.5"
+        memory: "20Mi"

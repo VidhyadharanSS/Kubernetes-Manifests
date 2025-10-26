@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pod
+  labels:
+    app: init-testing
+    environment: testing
+spec:
+  initContainers:
+  - name: check-api
+    image: curlimages/curl:latest
+    command:
+    - sh
+    - -c
+    - | #Multi line  block indicator
+      echo 'Check for API availability'
+      sleep 5 
+      until curl -s https://kubernetes.io > /dev/null; do 
+        echo 'Waiting for external API'
+        sleep 5 
+      done
+      echo 'API is available now'
+
+  - name: check-svc
+    image: curlimages/curl:latest
+    command:
+    - sh
+    - -c
+    - |
+      echo 'Checking service availability'
+      until nslookup accounts.localzoho.com; do 
+        echo 'Waiting for service DNS resolution'
+        sleep 5
+      done 
+      echo 'Service is available'
+
+  containers:
+  - name: main-app
+    image: nginx:latest
+    imagePullPolicy: Always
+    ports:
+    - containerPort: 80
+      name: http
+      protocol: TCP
+    env:
+    - name: nginx_host
+      value: "2205"
+    resources:
+      requests:
+        cpu: "0.2"
+        memory: "10Mi"
+      limits:
+        cpu: "1"
+        memory: "40Mi"

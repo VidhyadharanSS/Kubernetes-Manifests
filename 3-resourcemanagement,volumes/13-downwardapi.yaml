@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: downward-api-pod
+  labels:
+    app: downward-test-pod
+    environment: testing
+
+spec:
+  restartPolicy: Always
+  containers:
+  - name: metadata-container
+    image: busybox
+    imagePullPolicy: Always
+    command: [ "/bin/sh", "-c", "env && sleep 3600" ]
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "100Mi"
+      limits:
+        cpu: "200m"
+        memory: "200Mi"
+    env:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+    - name: POD_NAMESPACE
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.namespace
+    - name: POD_LABELS
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.labels

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: configmap-deploy
+  labels:
+    app: configmap-app
+    environment: testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: configmap-pod
+  template:
+    metadata:
+      labels:
+        app: configmap-pod
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:latest
+        imagePullPolicy: Always
+        env:
+        - name: TIER_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: configmap-data
+              key: APP
+        - name: ENVIRONMENT_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: configmap-data
+              key: ENVIRONMENT

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: test-rs
+  labels:
+    app: test-rs-pod
+    environment: testing
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-app
+    matchExpressions:
+    - key: name
+      operator: In
+      values:
+      - frontend
+      - backend
+
+  template:
+    metadata:
+      labels:
+        app: nginx-app
+        name: frontend
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: restart-test
+  labels:
+    app: restart-test-pod
+    environment: testing
+spec:
+  restartPolicy: OnFailure
+  containers:
+  - name: debug-container
+    image: busybox
+    imagePullPolicy: Always 
+    command:
+    - nslookup
+    - kubernetes.default.svc.cluster.local
+
+  - name: nginx-container
+    image: nginx
+    imagePullPolicy: IfNotPresent # Pull image from registry only if image not present on node 
+    ports:
+    - containerPort: 80
+      protocol: TCP
