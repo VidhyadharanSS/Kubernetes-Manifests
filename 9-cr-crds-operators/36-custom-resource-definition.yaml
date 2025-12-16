@@ -1,0 +1,33 @@
+apiVersion: apiextensions.k8s.io/v1 
+kind: CustomResourceDefinition 
+metadata: 
+  name: backuppolicies.ops.vidhyadharan 
+spec: 
+  group: ops.vidhyadharan 
+  names: 
+    plural: backuppolicies 
+    singular: backuppolicy 
+    kind: BackupPolicy 
+    shortNames: 
+      - bp 
+  scope: Namespaced 
+  versions: 
+    - name: v1 
+      served: true 
+      storage: true 
+      schema: 
+        openAPIV3Schema: 
+          type: Object 
+          properties: 
+            spec: 
+              type: Object 
+              properties: 
+                schedule: 
+                  type: string 
+                  description: "Cron schedule"
+                retentionDays:
+                  type: integer 
+                  description: "days to keep the backup"
+                targetPVC: 
+                  type: string 
+                  description: "pvc to backup"

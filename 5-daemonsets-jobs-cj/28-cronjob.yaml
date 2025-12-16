@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: message-cronjob
+  labels:
+    app: message-cronjob
+spec:
+  schedule: "*/1 * * * *" # Every 1 minute
+  successfulJobsHistoryLimit: 2 # Keep last 2 successful job records
+  failedJobsHistoryLimit: 1 # Keep last failed job
+  jobTemplate:
+    spec:
+      backoffLimit: 1 # Retry failed job once
+      ttlSecondsAfterFinished: 30 # Cleanup 30s after success/failure
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: cronjob-task
+            image: busybox:latest
+            command:
+            - "/bin/sh"
+            - "-c"
+            - "echo 'CronJob run at:' $(date); sleep 5"

@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: message-job
+  labels:
+    app: message-job
+spec:
+  completions: 3 # Run 3 successful pods before marking job complete
+  parallelism: 2 # Two pods can run in parallel
+  backoffLimit: 2 #  Retry a failed pod up to 2 times
+  ttlSecondsAfterFinished: 60 # Job auto-deletes after 1 minute
+  template:
+    spec:
+      restartPolicy: Never # Do not restart containers within a failed pod
+      containers:
+      - name: message-container
+        image: busybox:latest
+        command:
+        - "/bin/sh"
+        - "-c"
+        - "echo 'Running Job Task'; sleep 5; echo 'Task Done'"

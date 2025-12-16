@@ -1,0 +1,9 @@
+apiVersion: ops.vidhyadharan/v1 
+kind: BackupPolicy 
+metadata: 
+  name: mysql-backup 
+  namespace: default 
+spec: 
+  schedule: "*/5 * * * *"
+  retentionDays: 5 
+  targetPVC: mysql-data-pvc 

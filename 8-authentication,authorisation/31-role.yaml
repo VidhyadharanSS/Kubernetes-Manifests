@@ -1,0 +1,16 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: workload-editor
+  namespace: dev-roles
+rules:
+# Grant create and list permissions on pods 
+- apiGroups: [ "" ]
+  resources: [ "pods" ]
+  verbs: [ "create", "list" ]
+# Grant create and list permissions for deployments
+- apiGroups: [ "apps" ]
+  resources: [ "deployments" ]
+  verbs: [ "create", "list" ]
+
+

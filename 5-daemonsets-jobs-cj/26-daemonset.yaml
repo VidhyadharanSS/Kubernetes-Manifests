@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: daemonset-test-pod
+  labels:
+    environment: testing
+  namespace: logging-ns
+spec:
+  selector:
+    matchLabels:
+      app: log-collector
+  template:
+    metadata:
+      labels:
+        app: log-collector
+    spec:
+      volumes:
+      - name: log-volume
+        hostPath:
+          path: /var/log
+          type: DirectoryOrCreate
+      containers:
+      - name: log-container
+        image: busybox
+        ports:
+        - containerPort: 80
+          protocol: TCP
+          name: http
+        env:
+        - name: LOGGING_VALUE
+          value: "200"
+        resources:
+          requests:
+            cpu: "20m"
+            memory: "60Mi"
+          limits:
+            cpu: "50m"
+            memory: "100Mi"
+        command:
+        - "/bin/sh"
+        - -c
+        - "while true; do echo 'Collecting logs from pods..'; sleep 30; done"
+        volumeMounts:
+        - name: log-volume
+          mountPath: /var/log
+
+---
+
+

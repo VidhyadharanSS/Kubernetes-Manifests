@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: log-config
+  namespace: demo
+data:
+  LOG_MESSAGE: "Processing logs from app v1.0"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: log-secret
+  namespace: demo
+type: Opaque
+stringData:
+  API_KEY: "12345-ABCDE"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: log-processor
+  namespace: demo
+  labels:
+    app: log-processor
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: node1 # Replace with your node name
+  containers:
+  - name: app
+    image: busybox:latest
+    command: [ "/bin/sh", "-c", "while true; do echo $LOG_MESSAGE >> /shared/logs.txt; sleep 5; done" ]
+    env:
+    - name: LOG_MESSAGE
+      valueFrom:
+        configMapKeyRef:
+          name: log-config
+          key: LOG_MESSAGE
+    - name: API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: log-secret
+          key: API_KEY
+    volumeMounts:
+    - name: shared
+      mountPath: /shared
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "64Mi"
+      limits:
+        cpu: "200m"
+        memory: "128Mi"
+    livenessProbe:
+      exec:
+        command: [ "cat", "/shared/logs.txt" ]
+      initialDelaySeconds: 5
+      periodSeconds: 10
+  - name: sidecar-logger
+    image: busybox:latest
+    command: [ "/bin/sh", "-c", "tail -f /shared/logs.txt" ]
+    volumeMounts:
+    - name: shared
+      mountPath: /shared
+  volumes:
+  - name: shared
+    emptyDir: {}
+  restartPolicy: Always
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cleanup-logs
+  namespace: demo
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 30
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: cleaner
+            image: busybox:latest
+            command: [ "/bin/sh", "-c", "echo 'Cleaning old logs...' && rm -f /shared/logs.txt || true" ]
+            volumeMounts:
+            - name: shared
+              mountPath: /shared
+          volumes:
+          - name: shared
+            emptyDir: {}

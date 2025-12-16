@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind-workload-editor
+  namespace: dev-roles
+subjects:
+#Bind the role which we created earlier to the user - vidhya 
+- kind: User #Where we have to map - User or group or service account 
+  name: vidhya #name of the user 
+  apiGroup: rbac.authorization.k8s.io
+
+roleRef:
+  kind: Role
+  name: workload-editor
+  apiGroup: rbac.authorization.k8s.io
+
+
+kubectl config set-credentials vidhya \
+ --client-certificate=vidhya.crt \
+ --client-key=seema.key \
+ --certificate-authority=ca.crt \
+ --embed-certs=true

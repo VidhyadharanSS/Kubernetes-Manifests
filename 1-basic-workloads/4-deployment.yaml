@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: kite 
   name: nginx-deploy
   labels:
     app: nginx-deploy-eg
@@ -14,8 +15,8 @@ spec:
       operator: Exists
   strategy:
     type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 1
+    rollingUpdate: #zero downtime strategy, gradually update the pods one by one
+      maxUnavailable: 1 #by default they are 25 percent 
       maxSurge: 1
   template:
     metadata:
@@ -40,3 +41,4 @@ spec:
           limits:
             cpu: "1.5"
             memory: "20Mi"
+        

@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1
+kind: Kustomization
+
+
+resources: 
+  - ../../base 
+
+nameSuffix: -prod
+
+namePrefix: app2- 
+
+namespace: prod 
+
+labels: 
+  - pairs: 
+      env: prod 
+    includeSelectors: true  # adds labels not only to metadata but also to selectors and pod replicas 
+
+commonAnnotations: 
+  branch: prod 
+  contact: 800-700 
+
+images: 
+  - name: nginx 
+    newName: nginx 
+    newTag: "2.5"
+
+replicas: 
+  - name: nginx-deploy 
+    count: 5

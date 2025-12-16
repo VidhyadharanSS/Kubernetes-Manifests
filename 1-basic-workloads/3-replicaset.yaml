@@ -23,9 +23,19 @@ spec:
         app: nginx-app
         name: frontend
     spec:
+      volumes: 
+        - name: example-volume 
+          emptyDir: {} 
       containers:
       - name: nginx-container
         image: nginx
         ports:
         - containerPort: 80
           protocol: TCP
+          name: nginxport
+        env: 
+          - name: "ENTRYPOINT"
+            value: "Hello world"
+        volumeMounts: 
+          name: example-volume 
+          mountPath: /var/log 

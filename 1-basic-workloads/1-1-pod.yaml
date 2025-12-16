@@ -6,9 +6,24 @@ metadata:
     app: testing-pod
     environment: testing
 spec:
+  nodeName: node-01  #bypass the kube scheduler and can even schedule the workload on control plane components in self managed/on premise clusters despite the node taints 
+  tolerations:
+    - key: "hardware"
+      operator: "Equal"
+      value: "gpu"
+      effect: "NoSchedule" #this tolerated pod will only run on nodes with this taint effect 
+  nodeSelector: 
+    disk: ssd 
   containers:
   - name: test-container
     image: nginx:latest
+    command: 
+      - "sh"
+      - "-c"
+      - | 
+        echo "Hello world"
+        sleep 10 
+        echo "End of world"
     ports:
     - containerPort: 80
       name: http
@@ -23,3 +38,53 @@ spec:
       limits:
         cpu: "4"
         memory: "20Mi"
+
+
+--- 
+
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: test-app 
+  namespace: testing 
+  labels: 
+    app: my-test-app 
+    environment: testing 
+spec: 
+  nodeName: <node-host-name>
+  tolerations:
+    - key: "node.kubernetes.io/disk-pressure"
+      operator: "Exists"
+      effect: "NoSchedule"
+  nodeSelector: 
+    disk: ssd 
+  volumes: 
+    - name: shared-volume 
+      emptyDir: {} 
+  containers: 
+    - name: nginx
+      image: nginx:latest 
+      command: 
+        - "sh"
+        - "-c"
+        - | 
+          echo "Hello world"
+          sleep 360
+          echo "Hello welcome"
+      ports: 
+        - containerPort: 80 
+          name: http 
+          protocol: TCP 
+      env: 
+        - name: "DB_HOST"
+          value: "3306"
+      resources: 
+        requests: 
+          cpu: "2"
+          memory: "5Mi"
+        limits: 
+          cpu: "3"
+          memory: "10Mi"
+      volumeMounts: 
+        - name: shared-volume 
+          mountPath: /tmp/data 

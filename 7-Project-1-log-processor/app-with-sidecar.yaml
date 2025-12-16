@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sidecar-deploy
+  labels:
+    environment: testing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      volumes:
+      - name: shared-volume
+        emptyDir: {}
+      containers:
+      - name: app
+        image: nginx
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /var/log/nginx
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 3
+          periodSeconds: 5
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "50Mi"
+          limits:
+            cpu: "300m"
+            memory: "100Mi"
+      - name: sidecar
+        image: busybox
+        imagePullPolicy: Always
+        command: [ "/bin/sh", "-c", "tail -f /var/log/nginx/access.log" ]
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /var/log/nginx
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "50Mi"
+          limits:
+            cpu: "300m"
+            memory: "100Mi"

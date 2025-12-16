@@ -1,20 +1,29 @@
-apiVersion: v1
-kind: Pod
-metadata:
-  name: readiness-test-pod
-  labels:
-    app: readiness-test
-    environment: testing
-spec:
-  containers:
-  - name: busybox-app
-    image: busybox
-    command: [ "sh", "-c", "touch /tmp/ready; sleep 3600" ]
-    readinessProbe:
-      exec:
-        command:
-        - cat
-        - /tmp/ready
-      initialDelaySeconds: 5
-      periodSeconds: 5
-      failureThreshold: 1
+apiVersion: v1 
+kind: Pod 
+metadata: 
+  name: readiness-pod 
+  labels: 
+    app: readiness-pod-eg
+    environment: testing 
+spec: 
+  volumes: 
+    - name: nginx-volume 
+      emptyDir: {} 
+  containers: 
+    - name: nginx-container 
+      image: nginx:1.18 
+      imagePullPolicy: Always 
+      command: 
+        - "sh"
+        - "-c"
+        - "sleep 60"
+      readinessProbe: 
+        httpGet: 
+          path: /healthz 
+          port: 8080 
+        initialDelaySeconds: 60 
+        periodSeconds: 10 
+        timeoutSeconds: 15 
+        successThreshold: 5 
+        failureThreshold: 15 
+        
