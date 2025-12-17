@@ -1,0 +1,48 @@
+apiVersion: kustomize.config.k8s.io/v1
+kind: Kustomization
+
+resources: 
+  - ../../base 
+
+nameSuffix: dev
+namePrefix: app2- 
+namespace: dev 
+labels: 
+  - pairs: 
+      env: dev 
+    includeSelectors: true  # adds labels not only to metadata but also to selectors and pod replicas 
+commonAnnotations: 
+  branch: dev 
+  contact: 800-700 
+images: 
+  - name: nginx 
+    newName: nginx 
+    newTag: "latest"
+replicas: 
+  - name: nginx-deploy 
+    count: 2 
+
+#Inline patches - Using JSON RFC 6902 operations - add environment variable values and replacing resource requests and limits values.
+
+patches: 
+  - target: 
+      group: apps 
+      version: v1 
+      kind: Deployment 
+      name: nginx-deploy 
+    patch: |-
+      - op: add 
+        path: /spec/template/spec/containers/0/env 
+        value: 
+          - name: "LOGGER_LEVEL"
+            value: "debug"
+      
+      - op: replace 
+        path: /spec/template/spec/containers/0/resources 
+        value: 
+          requests: 
+            cpu: "100m"
+            memory: "256Mi"
+          limits: 
+            cpu: "200m"
+            memory: "512Mi"
